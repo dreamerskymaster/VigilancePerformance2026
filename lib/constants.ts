@@ -36,43 +36,55 @@ export const KSS_SCALE = [
   { value: 9, label: 'Extremely sleepy - Fighting to stay awake' },
 ];
 
-// NASA-TLX Subscales - as object for Object.entries() usage
-export const NASA_TLX_SUBSCALES: Record<string, { name: string; description: string; lowLabel: string; highLabel: string }> = {
+/**
+ * NASA-TLX Workload Assessment Subscales
+ * All scales: LEFT = Low/Negative, RIGHT = High/Positive
+ * Exception: Performance is inverted in scoring (low number = good performance)
+ * But UI shows: Poor (left) → Excellent (right) for intuitive reading
+ */
+export const NASA_TLX_SUBSCALES: Record<string, { 
+  name: string; 
+  description: string; 
+  lowLabel: string; 
+  highLabel: string;
+  invertScoring?: boolean;
+}> = {
   mentalDemand: {
     name: 'Mental Effort',
-    description: 'How much thinking and concentration did this task need?',
-    lowLabel: 'Very Easy',
-    highLabel: 'Very Hard',
+    description: 'How much thinking and concentration did this task require?',
+    lowLabel: 'Very Low',
+    highLabel: 'Very High',
   },
   physicalDemand: {
-    name: 'Physical Effort',
-    description: 'How much physical activity did this task need (clicking, looking)?',
-    lowLabel: 'Very Easy',
-    highLabel: 'Very Hard',
+    name: 'Physical Effort', 
+    description: 'How much physical activity was required (clicking, looking)?',
+    lowLabel: 'Very Low',
+    highLabel: 'Very High',
   },
   temporalDemand: {
     name: 'Time Pressure',
     description: 'How rushed or hurried did you feel?',
-    lowLabel: 'No Rush',
-    highLabel: 'Very Rushed',
+    lowLabel: 'Very Low',
+    highLabel: 'Very High',
   },
   performance: {
     name: 'Your Performance',
-    description: 'How well do you think you did on this task?',
-    lowLabel: 'Perfect',
-    highLabel: 'Failed',
+    description: 'How successful do you think you were at the task?',
+    lowLabel: 'Poor',
+    highLabel: 'Excellent',
+    invertScoring: true, // High value = good performance (inverted from traditional NASA-TLX)
   },
   effort: {
     name: 'Overall Effort',
-    description: 'How hard did you have to work to do well?',
-    lowLabel: 'No Effort',
-    highLabel: 'Maximum Effort',
+    description: 'How hard did you have to work to achieve your level of performance?',
+    lowLabel: 'Very Low',
+    highLabel: 'Very High',
   },
   frustration: {
     name: 'Frustration Level',
-    description: 'How annoyed, stressed, or irritated did you feel?',
-    lowLabel: 'Not At All',
-    highLabel: 'Extremely',
+    description: 'How frustrated, stressed, or annoyed did you feel?',
+    lowLabel: 'Very Low',
+    highLabel: 'Very High',
   },
 };
 
