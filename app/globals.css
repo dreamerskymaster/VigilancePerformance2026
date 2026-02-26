@@ -8,13 +8,8 @@
   --background-end-rgb: 255, 255, 255;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 10, 10, 20;
-    --background-end-rgb: 20, 20, 30;
-  }
-}
+/* Dark-mode override removed: app uses white cards everywhere;
+   a white foreground would make form text invisible on white inputs. */
 
 body {
   color: rgb(var(--foreground-rgb));
@@ -84,10 +79,14 @@ body {
   /* Form styles */
   .form-input {
     @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    color: #111827; /* Always dark text — prevents white-on-white on dark-mode systems */
+    background-color: #ffffff;
   }
   
   .form-select {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white;
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    color: #111827; /* Always dark text — prevents white-on-white on dark-mode systems */
+    background-color: #ffffff;
   }
   
   .form-label {
