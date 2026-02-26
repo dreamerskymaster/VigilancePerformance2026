@@ -39,14 +39,18 @@ export function generateImageData(): ImageData[] {
 }
 
 /**
- * Generate a random bounding box for a defect region within the 200×200 image.
+ * Generate a random bounding box as percentages (0–100) of image size.
+ * Using percentages means the overlay always aligns with the image
+ * regardless of the actual rendered pixel dimensions.
  */
 function generateBoundingBox(): BoundingBox {
-  const width = 40 + Math.floor(Math.random() * 60);
-  const height = 30 + Math.floor(Math.random() * 50);
-  const x = Math.floor(Math.random() * (200 - width));
-  const y = Math.floor(Math.random() * (200 - height));
-  return { x, y, width, height };
+  // Width/height: 25–55% of the image
+  const widthPct = 25 + Math.floor(Math.random() * 30);
+  const heightPct = 20 + Math.floor(Math.random() * 30);
+  // Keep the box fully inside the image
+  const xPct = Math.floor(Math.random() * (100 - widthPct));
+  const yPct = Math.floor(Math.random() * (100 - heightPct));
+  return { x: xPct, y: yPct, width: widthPct, height: heightPct };
 }
 
 /**

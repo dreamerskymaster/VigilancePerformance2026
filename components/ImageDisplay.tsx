@@ -35,12 +35,13 @@ export default function ImageDisplay({
     setImageError(true);
   };
 
-  // Scale bounding box to display size (200px -> 400px = 2x)
+  // Bounding box values are 0–100 percentages of the image dimensions.
+  // Using % keeps the overlay aligned with the image under any container size.
   const scaleBoundingBox = (box: BoundingBox): React.CSSProperties => ({
-    left: `${box.x * 2}px`,
-    top: `${box.y * 2}px`,
-    width: `${box.width * 2}px`,
-    height: `${box.height * 2}px`,
+    left: `${box.x}%`,
+    top: `${box.y}%`,
+    width: `${box.width}%`,
+    height: `${box.height}%`,
   });
 
   return (
@@ -78,9 +79,8 @@ export default function ImageDisplay({
         <img
           src={`/images/${image.filename}`}
           alt={`Steel surface inspection image ${image.id}`}
-          className={`inspection-image transition-opacity duration-200 ${
-            isLoading ? 'opacity-0' : 'opacity-100'
-          }`}
+          className={`inspection-image transition-opacity duration-200 ${isLoading ? 'opacity-0' : 'opacity-100'
+            }`}
           onLoad={handleImageLoad}
           onError={handleImageError}
           draggable={false}
@@ -100,11 +100,10 @@ export default function ImageDisplay({
 
           {/* Confidence Badge */}
           <div
-            className={`ai-confidence-badge ${
-              aiPrediction.prediction === 'DEFECT'
+            className={`ai-confidence-badge ${aiPrediction.prediction === 'DEFECT'
                 ? 'bg-red-600'
                 : 'bg-green-600'
-            }`}
+              }`}
           >
             <div className="flex items-center gap-1">
               <svg
