@@ -59,13 +59,11 @@ export default function QuestionnairePage() {
     if (currentNasaIndex < nasaSubscales.length - 1) {
       setCurrentNasaIndex(currentNasaIndex + 1);
     } else {
-      // NASA-TLX complete
       storage.set(STORAGE_KEYS.NASA_TLX, JSON.stringify(nasaTLX));
 
       if (condition === 'AI_ASSISTED') {
         setPhase('ai-trust');
       } else {
-        // Skip AI trust for unassisted condition
         setPhase('complete');
         router.push('/debrief');
       }
@@ -80,7 +78,6 @@ export default function QuestionnairePage() {
     if (currentTrustIndex < trustQuestions.length - 1) {
       setCurrentTrustIndex(currentTrustIndex + 1);
     } else {
-      // AI Trust complete
       storage.set(STORAGE_KEYS.AI_TRUST, JSON.stringify(aiTrust));
       setPhase('complete');
       router.push('/debrief');
@@ -99,161 +96,174 @@ export default function QuestionnairePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
       </div>
     );
   }
 
+  // Calculate progress percentage for progress bar
+  const totalSteps = phase === 'nasa-tlx' ? nasaSubscales.length : trustQuestions.length;
+  const currentStep = phase === 'nasa-tlx' ? currentNasaIndex : currentTrustIndex;
+  const progressPercent = ((currentStep + 1) / totalSteps) * 100;
+
   return (
-    <div className="min-h-screen py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* NASA-TLX Phase */}
+    <div className="min-h-screen py-8 px-4 bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="max-w-2xl mx-auto animate-fade-in-up">
+
         {phase === 'nasa-tlx' && (
-          <div className="card">
-            {/* Header */}
-            <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                NASA Task Load Index
+          <div className="card-modern">
+            {/* ── Header ────────────────────────────────────────────────── */}
+            <div className="text-center mb-8 border-b pb-6 border-gray-100">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4 shadow-inner">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
+                Workload Assessment
               </h1>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-lg">
                 Please rate your experience during the inspection task
               </p>
             </div>
 
-            {/* Progress */}
-            <div className="flex justify-center mb-6">
-              <div className="flex gap-2">
-                {nasaSubscales.map((_, idx) => (
-                  <div
-                    key={idx}
-                    className={`w-3 h-3 rounded-full transition-colors ${idx === currentNasaIndex
-                      ? 'bg-primary-600'
-                      : idx < currentNasaIndex
-                        ? 'bg-primary-300'
-                        : 'bg-gray-200'
-                      }`}
-                  />
-                ))}
+            {/* ── Progress Bar ─────────────────────────────────────────── */}
+            <div className="mb-8">
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">Progress</span>
+                <span className="text-sm font-bold text-blue-600">{currentNasaIndex + 1} / {nasaSubscales.length}</span>
+              </div>
+              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+                <div
+                  className="h-full bg-blue-500 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${progressPercent}%` }}
+                />
               </div>
             </div>
 
-            {/* Current question */}
-            {(() => {
-              const [key, subscale] = nasaSubscales[currentNasaIndex];
-              return (
-                <div className="mb-8">
-                  <NasaTLXScale
-                    subscale={subscale.name}
-                    description={subscale.description}
-                    lowLabel={subscale.lowLabel}
-                    highLabel={subscale.highLabel}
-                    value={nasaTLX[key as keyof NasaTLXScores] as number}
-                    onChange={(value) => handleNasaResponse(key, value)}
-                  />
-                </div>
-              );
-            })()}
+            {/* ── Questionnaire Form ───────────────────────────────────── */}
+            <div className="bg-gray-50 rounded-2xl p-6 mb-8 border border-gray-200">
+              {(() => {
+                const [key, subscale] = nasaSubscales[currentNasaIndex];
+                return (
+                  <div className="animate-fade-in-up" key={`nasa-${key}`}>
+                    <NasaTLXScale
+                      subscale={subscale.name}
+                      description={subscale.description}
+                      lowLabel={subscale.lowLabel}
+                      highLabel={subscale.highLabel}
+                      value={nasaTLX[key as keyof NasaTLXScores] as number}
+                      onChange={(value) => handleNasaResponse(key, value)}
+                    />
+                  </div>
+                );
+              })()}
+            </div>
 
-            {/* Navigation */}
             <div className="flex gap-4">
-              {currentNasaIndex > 0 && (
-                <button
-                  onClick={() => setCurrentNasaIndex(currentNasaIndex - 1)}
-                  className="btn btn-secondary flex-1"
-                >
-                  Previous
-                </button>
-              )}
+              <button
+                onClick={() => setCurrentNasaIndex(Math.max(0, currentNasaIndex - 1))}
+                disabled={currentNasaIndex === 0}
+                className={`py-4 px-6 font-bold rounded-xl border-2 transition-all ${currentNasaIndex === 0
+                    ? 'border-gray-100 text-gray-300 cursor-not-allowed bg-transparent'
+                    : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 cursor-pointer'
+                  }`}
+              >
+                ← Back
+              </button>
+
               <button
                 onClick={handleNasaNext}
                 disabled={!canProceedNasa()}
-                className="btn btn-primary flex-1"
+                className={`flex-1 py-4 font-bold text-lg rounded-xl transition-all shadow-md ${!canProceedNasa()
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                    : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-600/20'
+                  }`}
               >
-                {currentNasaIndex < nasaSubscales.length - 1 ? 'Next' : 'Continue'}
+                {currentNasaIndex < nasaSubscales.length - 1 ? 'Next →' : 'Continue'}
               </button>
             </div>
-
-            {/* Question counter */}
-            <p className="text-center text-sm text-gray-500 mt-4">
-              Question {currentNasaIndex + 1} of {nasaSubscales.length}
-            </p>
           </div>
         )}
 
         {/* AI Trust Phase (AI-Assisted condition only) */}
         {phase === 'ai-trust' && condition === 'AI_ASSISTED' && (
-          <div className="card">
-            {/* Header */}
-            <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <div className="card-modern">
+            {/* ── Header ────────────────────────────────────────────────── */}
+            <div className="text-center mb-8 border-b pb-6 border-purple-100">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4 shadow-inner">
+                <span className="text-3xl">🤖</span>
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
                 AI Assistance Evaluation
               </h1>
-              <p className="text-gray-600">
-                Please rate your experience with the AI assistance
+              <p className="text-gray-600 text-lg">
+                Please rate your experience with the AI assistant
               </p>
             </div>
 
-            {/* Progress */}
-            <div className="flex justify-center mb-6">
-              <div className="flex gap-2">
-                {trustQuestions.map((_, idx) => (
-                  <div
-                    key={idx}
-                    className={`w-3 h-3 rounded-full transition-colors ${idx === currentTrustIndex
-                      ? 'bg-primary-600'
-                      : idx < currentTrustIndex
-                        ? 'bg-primary-300'
-                        : 'bg-gray-200'
-                      }`}
-                  />
-                ))}
+            {/* ── Progress Bar ─────────────────────────────────────────── */}
+            <div className="mb-8">
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">Progress</span>
+                <span className="text-sm font-bold text-purple-600">{currentTrustIndex + 1} / {trustQuestions.length}</span>
+              </div>
+              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+                <div
+                  className="h-full bg-purple-500 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${progressPercent}%` }}
+                />
               </div>
             </div>
 
-            {/* Current question */}
-            {(() => {
-              const [key, question] = trustQuestions[currentTrustIndex];
-              return (
-                <div className="mb-8">
-                  <LikertScale
-                    question={question.question}
-                    min={1}
-                    max={7}
-                    minLabel="Strongly Disagree"
-                    maxLabel="Strongly Agree"
-                    value={aiTrust[key as keyof AITrustScores]}
-                    onChange={(value) => handleTrustResponse(key, value)}
-                    showNumbers
-                    midLabels={[{ value: 4, label: 'Neutral' }]}
-                  />
-                </div>
-              );
-            })()}
+            {/* ── Questionnaire Form ───────────────────────────────────── */}
+            <div className="bg-purple-50 rounded-2xl p-6 mb-8 border border-purple-100 shadow-sm relative overflow-hidden">
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-200 rounded-full blur-3xl opacity-50" />
 
-            {/* Navigation */}
+              {(() => {
+                const [key, question] = trustQuestions[currentTrustIndex];
+                return (
+                  <div className="animate-fade-in-up relative z-10" key={`trust-${key}`}>
+                    <LikertScale
+                      question={question.question}
+                      min={1}
+                      max={7}
+                      minLabel="Strongly Disagree"
+                      maxLabel="Strongly Agree"
+                      value={aiTrust[key as keyof AITrustScores]}
+                      onChange={(value) => handleTrustResponse(key, value)}
+                      showNumbers
+                      midLabels={[{ value: 4, label: 'Neutral' }]}
+                    />
+                  </div>
+                );
+              })()}
+            </div>
+
             <div className="flex gap-4">
-              {currentTrustIndex > 0 && (
-                <button
-                  onClick={() => setCurrentTrustIndex(currentTrustIndex - 1)}
-                  className="btn btn-secondary flex-1"
-                >
-                  Previous
-                </button>
-              )}
+              <button
+                onClick={() => setCurrentTrustIndex(Math.max(0, currentTrustIndex - 1))}
+                disabled={currentTrustIndex === 0}
+                className={`py-4 px-6 font-bold rounded-xl border-2 transition-all ${currentTrustIndex === 0
+                    ? 'border-gray-100 text-gray-300 cursor-not-allowed bg-transparent'
+                    : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 cursor-pointer'
+                  }`}
+              >
+                ← Back
+              </button>
+
               <button
                 onClick={handleTrustNext}
                 disabled={!canProceedTrust()}
-                className="btn btn-primary flex-1"
+                className={`flex-1 py-4 font-bold text-lg rounded-xl transition-all shadow-md ${!canProceedTrust()
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
+                    : 'bg-purple-600 text-white hover:bg-purple-700 shadow-purple-600/20'
+                  }`}
               >
-                {currentTrustIndex < trustQuestions.length - 1 ? 'Next' : 'Complete'}
+                {currentTrustIndex < trustQuestions.length - 1 ? 'Next →' : 'Complete Study'}
               </button>
             </div>
-
-            {/* Question counter */}
-            <p className="text-center text-sm text-gray-500 mt-4">
-              Question {currentTrustIndex + 1} of {trustQuestions.length}
-            </p>
           </div>
         )}
       </div>

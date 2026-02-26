@@ -70,7 +70,7 @@ export default function ConsentPage() {
                 {[
                   'Answer a few quick questions about yourself (2 minutes)',
                   'Learn how to spot defects in metal images (5 minutes)',
-                  'Look at 180 images and decide if each has a defect (30 minutes)',
+                  'Look at 90 images and decide if each has a defect (20 minutes)',
                   'Tell us how you felt during the task (5 minutes)',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2">
@@ -80,7 +80,7 @@ export default function ConsentPage() {
                 ))}
               </ul>
               <p className="text-gray-600 mt-3 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-                <strong>Total time:</strong> About 45 minutes
+                <strong>Total time:</strong> About 25 minutes
               </p>
             </section>
 
@@ -138,13 +138,16 @@ export default function ConsentPage() {
             </section>
 
             <section className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h2 className="text-xl font-bold text-blue-800 mb-3">📧 Questions?</h2>
+              <h2 className="text-xl font-bold text-blue-800 mb-3 flex items-center gap-2">
+                📧 Questions?
+              </h2>
               <p className="text-gray-700">
-                Contact the researcher:<br />
-                <strong>Ajith Srikanth</strong><br />
-                <a href="mailto:ajithsrikanth.f@northeastern.edu" className="text-blue-600 hover:underline">
-                  ajithsrikanth.f@northeastern.edu
-                </a>
+                <strong>Northeastern University</strong><br />
+                IE 6500: Human Performance<br />
+                <em>Vigilance Decrement in Visual Inspection</em>
+              </p>
+              <p className="text-gray-600 text-sm mt-2">
+                For questions about this study, please contact the research team through your course instructor.
               </p>
             </section>
           </div>
@@ -161,10 +164,10 @@ export default function ConsentPage() {
 
           {/* Agreement checkbox */}
           <label className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${hasScrolled
-              ? agreed
-                ? 'border-green-400 bg-green-50'
-                : 'border-gray-300 hover:border-blue-300 bg-white'
-              : 'border-gray-200 bg-gray-100 cursor-not-allowed opacity-60'
+            ? agreed
+              ? 'border-green-400 bg-green-50'
+              : 'border-gray-300 hover:border-blue-300 bg-white'
+            : 'border-gray-200 bg-gray-100 cursor-not-allowed opacity-60'
             }`}>
             <input
               type="checkbox"

@@ -10,6 +10,7 @@ import ResponseButtons from '@/components/ResponseButtons';
 import ProgressBar from '@/components/ProgressBar';
 import Timer, { BlockTimer } from '@/components/Timer';
 import { KSSScale } from '@/components/LikertScale';
+import { logger } from '@/lib/logger';
 import type { ImageData, Trial, Condition, TimeBlock } from '@/types';
 
 type TaskPhase = 'pre-kss' | 'task' | 'block-break' | 'post-kss';
@@ -58,6 +59,8 @@ export default function TaskPage() {
   const handlePreKSSSubmit = () => {
     if (preKSS === null) return;
 
+    logger.info('Task', 'Pre-task KSS recorded', { kss: preKSS });
+
     storage.set(STORAGE_KEYS.PRE_KSS, preKSS.toString());
     const now = Date.now(); // epoch ms – used by Timer component
     setTaskStartTime(now);
@@ -90,6 +93,14 @@ export default function TaskPage() {
       timestamp: new Date().toISOString(),
       aiPrediction: condition === 'AI_ASSISTED' ? getAIPrediction(currentImage.id) : undefined,
     };
+
+    logger.info('Task', `Trial ${currentTrialIndex + 1} completed`, {
+      imageId: currentImage.id,
+      response: isDefect ? 'DEFECT' : 'NO_DEFECT',
+      responseType,
+      responseTime,
+      timeBlock: block,
+    });
 
     const newTrials = [...trials, trial];
     setTrials(newTrials);

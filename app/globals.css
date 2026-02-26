@@ -309,3 +309,100 @@ body {
          font-mono text-sm font-bold text-gray-600 shadow-sm;
 }
 
+/* ==============================================
+   AI SCANNING ANIMATION
+   ============================================== */
+@keyframes ai-scan {
+  0%   { top: -10%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}
+
+.ai-scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(59, 130, 246, 0.5) 20%,
+    rgba(59, 130, 246, 1) 50%,
+    rgba(59, 130, 246, 0.5) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 20px 5px rgba(59, 130, 246, 0.5);
+  animation: ai-scan 0.8s ease-in-out;
+}
+
+/* AI Bounding Box Glow */
+@keyframes bbox-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7),
+                0 0 20px 5px rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0),
+                0 0 30px 10px rgba(239, 68, 68, 0.5);
+  }
+}
+
+.ai-bbox-glow {
+  animation: bbox-pulse 1.5s ease-in-out infinite;
+}
+
+/* AI Thinking dots */
+@keyframes thinking-dots {
+  0%, 20% { opacity: 0; }
+  40%      { opacity: 1; }
+  100%     { opacity: 0; }
+}
+
+.ai-thinking-dot:nth-child(1) { animation: thinking-dots 1.4s infinite 0s; }
+.ai-thinking-dot:nth-child(2) { animation: thinking-dots 1.4s infinite 0.2s; }
+.ai-thinking-dot:nth-child(3) { animation: thinking-dots 1.4s infinite 0.4s; }
+
+/* Confidence bar fill animation */
+@keyframes confidence-fill {
+  from { width: 0%; }
+  to   { width: var(--confidence); }
+}
+
+.confidence-bar-fill {
+  animation: confidence-fill 0.8s ease-out forwards;
+  animation-delay: 0.5s;
+}
+
+/* ==============================================
+   MOBILE RESPONSIVENESS
+   ============================================== */
+@media (max-width: 640px) {
+  .card-modern {
+    @apply p-4;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+  }
+
+  .inspection-image-wrapper {
+    width: 100%;
+    max-width: 350px;
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
+  .btn-defect,
+  .btn-no-defect {
+    @apply py-4 px-6 text-lg;
+  }
+
+  .keyboard-hint {
+    display: none;
+  }
+}
+
+/* Ensure all interactive elements meet 44×44px touch target size */
+button,
+a {
+  min-height: 44px;
+}

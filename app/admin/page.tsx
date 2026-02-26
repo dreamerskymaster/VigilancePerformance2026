@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { db } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { calculateDPrime, calculateCriterion } from '@/lib/utils';
 import type { Condition, Trial } from '@/types';
-import type { TrialRecord } from '@/lib/supabase';
+
+type TrialRecord = any;
 
 interface ParticipantSummary {
   id: string;
@@ -41,20 +42,18 @@ export default function AdminPage() {
     setError(null);
 
     try {
-      const data = await db.getAllParticipants();
+      if (!supabase) throw new Error('Supabase not configured');
+      const { data, error } = await supabase.from('participants').select('*');
+      if (error) throw error;
 
-      const summaries: ParticipantSummary[] = data.map((p: any) => {
-        const results = p.trial_results || {};
-        const block1 = results.block1 || {};
-        const block2 = results.block2 || {};
-        const block3 = results.block3 || {};
+      const summaries: ParticipantSummary[] = (data || []).map((p: any) => {
+        const trials = p.trials || [];
+        const totalHits = trials.filter((t: any) => t.responseType === 'HIT').length;
+        const totalMisses = trials.filter((t: any) => t.responseType === 'MISS').length;
+        const totalFAs = trials.filter((t: any) => t.responseType === 'FA').length;
+        const totalCRs = trials.filter((t: any) => t.responseType === 'CR').length;
 
-        const totalHits = (block1.hits || 0) + (block2.hits || 0) + (block3.hits || 0);
-        const totalMisses = (block1.misses || 0) + (block2.misses || 0) + (block3.misses || 0);
-        const totalFAs = (block1.falseAlarms || 0) + (block2.falseAlarms || 0) + (block3.falseAlarms || 0);
-        const totalCRs = (block1.correctRejections || 0) + (block2.correctRejections || 0) + (block3.correctRejections || 0);
-
-        const totalTrials = totalHits + totalMisses + totalFAs + totalCRs;
+        const totalTrials = trials.length;
         const correct = totalHits + totalCRs;
         const accuracy = totalTrials > 0 ? (correct / totalTrials) * 100 : 0;
 
@@ -66,7 +65,7 @@ export default function AdminPage() {
           id: p.id,
           participantId: p.participant_id,
           condition: p.condition,
-          completedAt: p.completion_timestamp || p.created_at,
+          completedAt: p.completed_at || p.created_at,
           totalTrials,
           overallAccuracy: accuracy,
           dPrime,
@@ -86,8 +85,21 @@ export default function AdminPage() {
     setIsLoading(true);
 
     try {
-      const trials = await db.getTrials(participantId);
-      setParticipantTrials(trials);
+      if (!supabase) throw new Error('Supabase not configured');
+      const { data, error } = await supabase.from('participants').select('trials').eq('participant_id', participantId).single();
+      if (error) throw error;
+
+      const trials = data?.trials || [];
+      const formattedTrials = trials.map((t: any) => ({
+        trial_number: t.trialNumber,
+        time_block: t.timeBlock,
+        defect_type: t.defectType,
+        response: t.participantResponse ? 'DEFECT' : 'NO_DEFECT',
+        response_type: t.responseType,
+        response_time: t.responseTime
+      }));
+
+      setParticipantTrials(formattedTrials);
       setSelectedParticipant(participantId);
     } catch (err) {
       console.error('Error loading trials:', err);

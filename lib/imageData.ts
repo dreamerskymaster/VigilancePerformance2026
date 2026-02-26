@@ -9,10 +9,16 @@ const DEFECT_CODES: DefectType[] = ['Cr', 'In', 'Pa', 'PS', 'RS', 'Sc'];
  */
 export function generateImageData(): ImageData[] {
   const images: ImageData[] = [];
-
-  // 90 defective images (15 per type × 6 types)
+  
+  // 45 defective images (7-8 per defect type, 45 total)
+  // Distribute: Cr=8, In=8, Pa=8, PS=7, RS=7, Sc=7
+  const defectCounts: Record<DefectType, number> = {
+    Cr: 8, In: 8, Pa: 8, PS: 7, RS: 7, Sc: 7, none: 0
+  };
+  
   DEFECT_CODES.forEach((defectType) => {
-    for (let i = 1; i <= 15; i++) {
+    const count = defectCounts[defectType] || 7;
+    for (let i = 1; i <= count; i++) {
       const imageNum = i.toString().padStart(3, '0');
       images.push({
         id: `${defectType}_${imageNum}`,
@@ -23,9 +29,9 @@ export function generateImageData(): ImageData[] {
       });
     }
   });
-
-  // 90 non-defective images
-  for (let i = 1; i <= 90; i++) {
+  
+  // 45 non-defective images
+  for (let i = 1; i <= 45; i++) {
     const imageNum = i.toString().padStart(3, '0');
     images.push({
       id: `none_${imageNum}`,
@@ -34,7 +40,7 @@ export function generateImageData(): ImageData[] {
       hasDefect: false,
     });
   }
-
+  
   return images;
 }
 
@@ -54,38 +60,47 @@ function generateBoundingBox(): BoundingBox {
 }
 
 /**
- * Generate simulated AI predictions for a set of images based on configured accuracy rates.
+ * Generate AI predictions with specified accuracy rates.
+ * TPR (True Positive Rate) = 88%: Probability AI correctly identifies defect
+ * TNR (True Negative Rate) = 82%: Probability AI correctly identifies clean
+ * 
+ * IMPORTANT: Bounding box is ONLY added when AI predicts DEFECT.
+ * This prevents showing boxes on clean images.
  */
 export function generateAIPredictions(images: ImageData[]): Map<string, AIPrediction> {
-  const predictions = new Map<string, AIPrediction>();
-
-  images.forEach((image) => {
-    const isDefect = image.hasDefect;
-    let aiPrediction: 'DEFECT' | 'NO_DEFECT';
-    let isCorrect: boolean;
-
-    if (isDefect) {
-      isCorrect = Math.random() < STUDY_CONFIG.aiTPR;
-      aiPrediction = isCorrect ? 'DEFECT' : 'NO_DEFECT';
+  const predictions = new Map<string, AIPrediction>()
+  
+  images.forEach(image => {
+    const isActualDefect = image.hasDefect
+    let aiPrediction: 'DEFECT' | 'NO_DEFECT'
+    let isCorrect: boolean
+    
+    if (isActualDefect) {
+      // True Positive Rate = 88%
+      isCorrect = Math.random() < STUDY_CONFIG.aiTPR
+      aiPrediction = isCorrect ? 'DEFECT' : 'NO_DEFECT'
     } else {
-      isCorrect = Math.random() < STUDY_CONFIG.aiTNR;
-      aiPrediction = isCorrect ? 'NO_DEFECT' : 'DEFECT';
+      // True Negative Rate = 82%
+      isCorrect = Math.random() < STUDY_CONFIG.aiTNR
+      aiPrediction = isCorrect ? 'NO_DEFECT' : 'DEFECT'
     }
-
+    
+    // Confidence: correct predictions get higher confidence
     const confidence = isCorrect
-      ? 70 + Math.floor(Math.random() * 25)
-      : 40 + Math.floor(Math.random() * 30);
-
+      ? 70 + Math.floor(Math.random() * 25)  // 70-94%
+      : 40 + Math.floor(Math.random() * 30)  // 40-69%
+    
     predictions.set(image.id, {
       imageId: image.id,
       prediction: aiPrediction,
       confidence,
+      // ONLY add bounding box if AI predicts DEFECT
       boundingBox: aiPrediction === 'DEFECT' ? (image.boundingBox || generateBoundingBox()) : undefined,
       isCorrect,
-    });
-  });
-
-  return predictions;
+    })
+  })
+  
+  return predictions
 }
 
 // Module-level cache so images and predictions are stable within a session.
@@ -119,21 +134,22 @@ export function getAIPrediction(imageId: string): AIPrediction | undefined {
  */
 export function generateTrialOrder(): ImageData[] {
   const images = getStudyImages();
-  const defectImages = images.filter((img) => img.hasDefect);
-  const nonDefectImages = images.filter((img) => !img.hasDefect);
-
+  const defectImages = images.filter(img => img.hasDefect);
+  const nonDefectImages = images.filter(img => !img.hasDefect);
+  
   const shuffledDefects = shuffleArray(defectImages);
   const shuffledNonDefects = shuffleArray(nonDefectImages);
-
+  
   const trialOrder: ImageData[] = [];
-
+  
+  // 3 blocks, 30 images each (15 defect + 15 non-defect per block)
   for (let block = 0; block < 3; block++) {
-    const blockDefects = shuffledDefects.slice(block * 30, (block + 1) * 30);
-    const blockNonDefects = shuffledNonDefects.slice(block * 30, (block + 1) * 30);
+    const blockDefects = shuffledDefects.slice(block * 15, (block + 1) * 15);
+    const blockNonDefects = shuffledNonDefects.slice(block * 15, (block + 1) * 15);
     const blockImages = shuffleArray([...blockDefects, ...blockNonDefects]);
     trialOrder.push(...blockImages);
   }
-
+  
   return trialOrder;
 }
 

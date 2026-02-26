@@ -2,8 +2,8 @@ import type { StudyConfig, DefectType } from '@/types';
 
 // Study Configuration
 export const STUDY_CONFIG: StudyConfig = {
-  totalImages: 180,
-  imagesPerBlock: 60,
+  totalImages: 90,
+  imagesPerBlock: 30,
   defectPrevalence: 0.5,
   aiAccuracy: 0.85,
   aiTPR: 0.88,
@@ -87,9 +87,9 @@ export const AI_TRUST_QUESTIONS: Record<string, { question: string }> = {
 
 // Time blocks
 export const TIME_BLOCKS: Record<number, { start: number; end: number; label: string }> = {
-  1: { start: 1, end: 60, label: 'First 10 minutes' },
-  2: { start: 61, end: 120, label: 'Middle 10 minutes' },
-  3: { start: 121, end: 180, label: 'Last 10 minutes' },
+  1: { start: 1, end: 30, label: 'First 7 minutes' },
+  2: { start: 31, end: 60, label: 'Middle 7 minutes' },
+  3: { start: 61, end: 90, label: 'Last 7 minutes' },
 };
 
 // ALL Storage Keys - COMPLETE LIST
